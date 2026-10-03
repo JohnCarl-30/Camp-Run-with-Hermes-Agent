@@ -1,0 +1,388 @@
+{
+ "as_of": "2026-09-30 21:00:00",
+ "problems": {
+  "kpt": {
+   "rating_before": 3.78,
+   "rating_recent": 2.33,
+   "missed_shifts_30d": 46,
+   "score": 26,
+   "top_topics": [
+    {
+     "topic": "stock",
+     "negative_reviews": 7
+    },
+    {
+     "topic": "staff",
+     "negative_reviews": 6
+    },
+    {
+     "topic": "cleanliness",
+     "negative_reviews": 6
+    }
+   ],
+   "lapsed_regulars": 11
+  },
+  "stock": {
+   "products": 14,
+   "pairs": 147,
+   "fixable": 37
+  },
+  "expiring": {
+   "rows": 224,
+   "php": 674171
+  },
+  "duplicates": {
+   "count": 17,
+   "php": 148912
+  }
+ },
+ "branches": [
+  {
+   "branch": "KPT",
+   "name": "Suki Mart Kapitolyo",
+   "health_score": 26,
+   "status": "red",
+   "rating_recent": 2.33,
+   "rating_before": 3.78,
+   "late_delivery_pct_30d": 26.1,
+   "missed_shift_pct_30d": 7.8,
+   "unanswered_tickets": 7,
+   "worst_metric": "rating"
+  },
+  {
+   "branch": "ORT",
+   "name": "Suki Mart Ortigas Center",
+   "health_score": 69,
+   "status": "amber",
+   "rating_recent": 2.93,
+   "rating_before": 3.52,
+   "late_delivery_pct_30d": 33.6,
+   "missed_shift_pct_30d": 3.1,
+   "unanswered_tickets": 1,
+   "worst_metric": "rating"
+  },
+  {
+   "branch": "KAT",
+   "name": "Suki Mart Katipunan",
+   "health_score": 72,
+   "status": "amber",
+   "rating_recent": 3.98,
+   "rating_before": 3.84,
+   "late_delivery_pct_30d": 31.1,
+   "missed_shift_pct_30d": 7.2,
+   "unanswered_tickets": 6,
+   "worst_metric": "missed shifts"
+  },
+  {
+   "branch": "CUB",
+   "name": "Suki Mart Cubao",
+   "health_score": 77,
+   "status": "green",
+   "rating_recent": 3.17,
+   "rating_before": 3.3,
+   "late_delivery_pct_30d": 32.8,
+   "missed_shift_pct_30d": 4.4,
+   "unanswered_tickets": 3,
+   "worst_metric": "late deliveries"
+  },
+  {
+   "branch": "MKN",
+   "name": "Suki Mart Marikina",
+   "health_score": 79,
+   "status": "green",
+   "rating_recent": 3.38,
+   "rating_before": 3.83,
+   "late_delivery_pct_30d": 30.9,
+   "missed_shift_pct_30d": 2.8,
+   "unanswered_tickets": 2,
+   "worst_metric": "rating"
+  },
+  {
+   "branch": "ALB",
+   "name": "Suki Mart Alabang",
+   "health_score": 80,
+   "status": "green",
+   "rating_recent": 3.7,
+   "rating_before": 3.71,
+   "late_delivery_pct_30d": 29.3,
+   "missed_shift_pct_30d": 4.3,
+   "unanswered_tickets": 8,
+   "worst_metric": "unanswered tickets"
+  },
+  {
+   "branch": "TMR",
+   "name": "Suki Mart Tomas Morato",
+   "health_score": 80,
+   "status": "green",
+   "rating_recent": 3.82,
+   "rating_before": 3.85,
+   "late_delivery_pct_30d": 40.0,
+   "missed_shift_pct_30d": 2.6,
+   "unanswered_tickets": 3,
+   "worst_metric": "late deliveries"
+  },
+  {
+   "branch": "BGC",
+   "name": "Suki Mart BGC High Street",
+   "health_score": 87,
+   "status": "green",
+   "rating_recent": 3.7,
+   "rating_before": 3.8,
+   "late_delivery_pct_30d": 30.8,
+   "missed_shift_pct_30d": 3.2,
+   "unanswered_tickets": 3,
+   "worst_metric": "late deliveries"
+  },
+  {
+   "branch": "MKT",
+   "name": "Suki Mart Makati Legazpi",
+   "health_score": 87,
+   "status": "green",
+   "rating_recent": 3.8,
+   "rating_before": 3.79,
+   "late_delivery_pct_30d": 29.0,
+   "missed_shift_pct_30d": 3.1,
+   "unanswered_tickets": 6,
+   "worst_metric": "unanswered tickets"
+  },
+  {
+   "branch": "PQE",
+   "name": "Suki Mart Parañaque BF",
+   "health_score": 87,
+   "status": "green",
+   "rating_recent": 3.64,
+   "rating_before": 3.85,
+   "late_delivery_pct_30d": 28.2,
+   "missed_shift_pct_30d": 2.5,
+   "unanswered_tickets": 3,
+   "worst_metric": "rating"
+  },
+  {
+   "branch": "ERM",
+   "name": "Suki Mart Ermita",
+   "health_score": 90,
+   "status": "green",
+   "rating_recent": 3.83,
+   "rating_before": 3.95,
+   "late_delivery_pct_30d": null,
+   "missed_shift_pct_30d": 5.2,
+   "unanswered_tickets": 0,
+   "worst_metric": "missed shifts"
+  },
+  {
+   "branch": "MAN",
+   "name": "Suki Mart Mandaluyong Shaw",
+   "health_score": 94,
+   "status": "green",
+   "rating_recent": 3.83,
+   "rating_before": 3.71,
+   "late_delivery_pct_30d": null,
+   "missed_shift_pct_30d": 2.3,
+   "unanswered_tickets": 4,
+   "worst_metric": "unanswered tickets"
+  }
+ ],
+ "totals": {
+  "applied": 6,
+  "pending": 9,
+  "rejected": 0,
+  "php_protected": 71205
+ },
+ "actions": [
+  {
+   "id": 15,
+   "type": "cancel_po",
+   "status": "pending_approval",
+   "summary": "Cancel PO-2026-00764 (duplicate of PO-2026-00533)",
+   "evidence": "Same Pinoy Snack Makers Inc. order of 207 × Crackers 10pack for ORT as PO-2026-00533, placed 6h later; ₱11,627",
+   "reasoning": "Duplicate of in-transit PO-2026-00533 for the same supplier, branch, SKU and qty.",
+   "confidence": 0.95,
+   "risk": "high",
+   "php": 11627,
+   "created_at": "2026-09-30 21:00:00",
+   "decided_at": null
+  },
+  {
+   "id": 14,
+   "type": "cancel_po",
+   "status": "pending_approval",
+   "summary": "Cancel PO-2026-00765 (duplicate of PO-2026-00009)",
+   "evidence": "Same Metro Beverage Distributors order of 226 × Calamansi Juice 1L for BGC as PO-2026-00009, placed 20h later; ₱17,472",
+   "reasoning": "Duplicate of in-transit PO-2026-00009 for the same supplier, branch, SKU and qty.",
+   "confidence": 0.95,
+   "risk": "high",
+   "php": 17472,
+   "created_at": "2026-09-30 21:00:00",
+   "decided_at": null
+  },
+  {
+   "id": 13,
+   "type": "cancel_po",
+   "status": "pending_approval",
+   "summary": "Cancel PO-2026-00769 (duplicate of PO-2026-00009)",
+   "evidence": "Same Metro Beverage Distributors order of 226 × Calamansi Juice 1L for BGC as PO-2026-00009, placed 9h later; ₱17,472",
+   "reasoning": "Duplicate of in-transit PO-2026-00009 for the same supplier, branch, SKU and qty.",
+   "confidence": 0.95,
+   "risk": "high",
+   "php": 17472,
+   "created_at": "2026-09-30 21:00:00",
+   "decided_at": null
+  },
+  {
+   "id": 12,
+   "type": "cancel_po",
+   "status": "pending_approval",
+   "summary": "Cancel PO-2026-00776 (duplicate of PO-2026-00009)",
+   "evidence": "Same Metro Beverage Distributors order of 226 × Calamansi Juice 1L for BGC as PO-2026-00009, placed 3h later; ₱17,472",
+   "reasoning": "Duplicate of in-transit PO-2026-00009 for the same supplier, branch, SKU and qty.",
+   "confidence": 0.95,
+   "risk": "high",
+   "php": 17472,
+   "created_at": "2026-09-30 21:00:00",
+   "decided_at": null
+  },
+  {
+   "id": 11,
+   "type": "cancel_po",
+   "status": "approved",
+   "summary": "Cancel PO-2026-00773 (duplicate of PO-2026-00173)",
+   "evidence": "Same Mindanao Coffee Traders order of 170 × Corn Flakes 500g for ALB as PO-2026-00173, placed 9h later; ₱21,422",
+   "reasoning": "Duplicate of pending PO-2026-00173 for the same supplier, branch, SKU and qty.",
+   "confidence": 0.95,
+   "risk": "high",
+   "php": 21422,
+   "created_at": "2026-09-30 21:00:00",
+   "decided_at": "2026-09-30 21:00:00"
+  },
+  {
+   "id": 10,
+   "type": "markdown",
+   "status": "pending_approval",
+   "summary": "50% off Beef Brisket kg at ERM until 2026-10-02",
+   "evidence": "35 units worth ₱13,978 at cost expire 2026-10-01; sells 2.1/day (8.3× too slow)",
+   "reasoning": "35 kg won't sell through before expiry at 2.1/day.",
+   "confidence": 0.9,
+   "risk": "high",
+   "php": 13978,
+   "created_at": "2026-09-30 21:00:00",
+   "decided_at": null
+  },
+  {
+   "id": 9,
+   "type": "markdown",
+   "status": "pending_approval",
+   "summary": "50% off Beef Brisket kg at ORT until 2026-10-02",
+   "evidence": "39 units worth ₱15,575 at cost expire 2026-10-01; sells 2.1/day (9.3× too slow)",
+   "reasoning": "39 kg won't sell through before expiry at 2.1/day.",
+   "confidence": 0.9,
+   "risk": "high",
+   "php": 15575,
+   "created_at": "2026-09-30 21:00:00",
+   "decided_at": null
+  },
+  {
+   "id": 8,
+   "type": "markdown",
+   "status": "pending_approval",
+   "summary": "40% off Beef Brisket kg at KPT until 2026-10-02",
+   "evidence": "41 units worth ₱16,374 at cost expire 2026-10-01; sells 2.7/day (7.7× too slow)",
+   "reasoning": "41 kg won't sell through before expiry at 2.7/day.",
+   "confidence": 0.9,
+   "risk": "high",
+   "php": 16374,
+   "created_at": "2026-09-30 21:00:00",
+   "decided_at": null
+  },
+  {
+   "id": 7,
+   "type": "markdown",
+   "status": "pending_approval",
+   "summary": "40% off Pork Kasim kg at BGC until 2026-10-02",
+   "evidence": "69 units worth ₱16,659 at cost expire 2026-10-01; sells 4.9/day (7.0× too slow)",
+   "reasoning": "69 kg won't sell through before expiry at 4.9/day.",
+   "confidence": 0.9,
+   "risk": "high",
+   "php": 16659,
+   "created_at": "2026-09-30 21:00:00",
+   "decided_at": null
+  },
+  {
+   "id": 6,
+   "type": "markdown",
+   "status": "pending_approval",
+   "summary": "50% off Beef Brisket kg at BGC until 2026-10-02",
+   "evidence": "80 units worth ₱31,949 at cost expire 2026-10-01; sells 4.7/day (8.5× too slow)",
+   "reasoning": "80 kg won't sell through before expiry at 4.7/day.",
+   "confidence": 0.9,
+   "risk": "high",
+   "php": 31949,
+   "created_at": "2026-09-30 21:00:00",
+   "decided_at": null
+  },
+  {
+   "id": 5,
+   "type": "transfer_stock",
+   "status": "applied",
+   "summary": "Move 77 × Spaghetti Sauce Sweet 1kg PQE → ORT",
+   "evidence": "ORT 0 on hand, sells 4.4/day; PQE 381 on hand = 89 days cover → 71 after",
+   "reasoning": "ORT is out of Spaghetti Sauce while PQE holds 112 days of cover.",
+   "confidence": 0.86,
+   "risk": "low",
+   "php": 7392,
+   "created_at": "2026-09-30 21:00:00",
+   "decided_at": "2026-09-30 21:00:00"
+  },
+  {
+   "id": 4,
+   "type": "transfer_stock",
+   "status": "applied",
+   "summary": "Move 13 × Diapers Medium 40pc KPT → ORT",
+   "evidence": "ORT 0 on hand, sells 0.9/day; KPT 39 on hand = 56 days cover → 37 after",
+   "reasoning": "ORT is out of Diapers Medium while KPT holds 107 days of cover.",
+   "confidence": 0.75,
+   "risk": "low",
+   "php": 8099,
+   "created_at": "2026-09-30 21:00:00",
+   "decided_at": "2026-09-30 21:00:00"
+  },
+  {
+   "id": 3,
+   "type": "transfer_stock",
+   "status": "applied",
+   "summary": "Move 16 × Diapers Medium 40pc KPT → KAT",
+   "evidence": "KAT 0 on hand, sells 1.3/day; KPT 55 on hand = 79 days cover → 56 after",
+   "reasoning": "KAT is out of Diapers Medium while KPT holds 107 days of cover.",
+   "confidence": 0.86,
+   "risk": "low",
+   "php": 10400,
+   "created_at": "2026-09-30 21:00:00",
+   "decided_at": "2026-09-30 21:00:00"
+  },
+  {
+   "id": 2,
+   "type": "transfer_stock",
+   "status": "applied",
+   "summary": "Move 20 × Diapers Medium 40pc KPT → ALB",
+   "evidence": "ALB 0 on hand, sells 1.3/day; KPT 75 on hand = 107 days cover → 79 after",
+   "reasoning": "ALB is out of Diapers Medium while KPT holds 107 days of cover.",
+   "confidence": 0.92,
+   "risk": "low",
+   "php": 12012,
+   "created_at": "2026-09-30 21:00:00",
+   "decided_at": "2026-09-30 21:00:00"
+  },
+  {
+   "id": 1,
+   "type": "transfer_stock",
+   "status": "applied",
+   "summary": "Move 99 × Spaghetti Sauce Sweet 1kg PQE → ALB",
+   "evidence": "ALB 0 on hand, sells 9.6/day; PQE 480 on hand = 112 days cover → 89 after",
+   "reasoning": "ALB is out of Spaghetti Sauce while PQE holds 112 days of cover.",
+   "confidence": 0.92,
+   "risk": "low",
+   "php": 11880,
+   "created_at": "2026-09-30 21:00:00",
+   "decided_at": "2026-09-30 21:00:00"
+  }
+ ]
+}

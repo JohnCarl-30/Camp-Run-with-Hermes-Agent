@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Suki Autopilot · live evidence ledger</title>
+<meta name="description" content="An autonomous operations agent for Suki Mart, built on Hermes. Finds why branches lose money, fixes it, and shows the evidence for every decision.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: oklch(0.975 0.008 85);
+    --surface: oklch(0.995 0.004 85);
+    --ink: oklch(0.22 0.02 60);
+    --muted: oklch(0.50 0.02 60);
+    --faint: oklch(0.66 0.015 60);
+    --line: oklch(0.89 0.012 80);
+    --accent: oklch(0.47 0.11 152);      /* market-leaf green */
+    --accent-soft: oklch(0.93 0.04 152);
+    --ok-ink: var(--accent);             /* applied / approved / live */
+    --ok-soft: var(--accent-soft);
+    --bad: oklch(0.55 0.17 28);
+    --bad-soft: oklch(0.94 0.035 28);
+    --warn: oklch(0.68 0.13 75);
+    --warn-soft: oklch(0.95 0.045 85);
+    --warn-ink: oklch(0.48 0.1 70);
+    --good: oklch(0.55 0.11 152);
+    --src-ink: oklch(0.47 0.12 55);      /* Bantay (people / customer) badge */
+    --src-soft: oklch(0.94 0.05 70);
+    --src-line: oklch(0.74 0.13 60);
+    --flash: oklch(0.90 0.09 85);
+    --radius: 6px;
+    --sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+    --serif: "Fraunces", Georgia, serif;
+  }
+  /* Dark: deep green #12302A / cream #FBF7EF / mango #F09A3E. Text pairs measured >= 5.9:1. */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #0E2621;
+      --surface: #12302A;
+      --ink: #FBF7EF;
+      --muted: #CFC8B8;
+      --faint: #ADA796;
+      --line: #2B4C44;
+      --accent: #F09A3E;
+      --accent-soft: rgba(240, 154, 62, .16);
+      --ok-ink: #9BE0B3;
+      --ok-soft: #1D4A3C;
+      --bad: #FF9A85;
+      --bad-soft: #4A2620;
+      --warn: #F2B84B;
+      --warn-soft: #45371A;
+      --warn-ink: #F6C774;
+      --good: #6FCB93;
+      --src-ink: #F7B877;
+      --src-soft: rgba(240, 154, 62, .16);
+      --src-line: #F09A3E;
+      --flash: rgba(240, 154, 62, .30);
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--paper); color: var(--ink); font: 15px/1.5 var(--sans); }
+  a { color: var(--accent); }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 0 28px; }
+
+  header.top { border-bottom: 1px solid var(--line); background: var(--surface); }
+  header.top .wrap { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 16px; min-height: 56px; padding-top: 8px; padding-bottom: 8px; }
+  .brand { font-weight: 600; letter-spacing: -0.01em; }
+  .brand span { color: var(--accent); }
+  .asof { margin-left: auto; font: 12px var(--mono); color: var(--muted); }
+  .chip { font: 500 11px var(--mono); text-transform: uppercase; letter-spacing: .06em; padding: 3px 8px;
+          border: 1px solid var(--line); border-radius: 999px; color: var(--muted); }
+  .chip[data-state="live"] { color: var(--ok-ink); border-color: var(--ok-soft); background: var(--ok-soft); }
+  .chip[data-state="stale"] { color: var(--warn-ink); border-color: var(--warn); background: var(--warn-soft); text-transform: none; letter-spacing: 0; }
+
+  .lede { display: grid; grid-template-columns: 1.1fr 1fr; gap: 48px; padding: 44px 0 36px; align-items: end; }
+  .lede h1 { font: 600 clamp(28px, 3.4vw, 42px)/1.12 var(--serif); letter-spacing: -0.02em; margin: 0 0 14px; text-wrap: balance; }
+  .lede p { margin: 0; color: var(--muted); max-width: 52ch; text-wrap: pretty; }
+  .problems { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .problems td { padding: 9px 0; border-top: 1px solid var(--line); vertical-align: baseline; }
+  .problems td.n { font: 500 15px var(--mono); text-align: right; white-space: nowrap; padding-left: 16px; }
+  .problems tr:last-child td { border-bottom: 1px solid var(--line); }
+
+  /* open on your phone (wide screens / projector only) */
+  .phone { display: none; align-items: center; gap: 14px; margin-top: 22px; }
+  .phone img { width: 104px; height: 104px; border-radius: 4px; background: #fff; flex: none; }
+  .phone b { display: block; font-weight: 600; }
+  .phone span { font: 13px var(--mono); color: var(--muted); }
+  @media (min-width: 761px) { .phone { display: flex; } }
+
+  .grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 28px; padding-bottom: 48px; }
+  section h2 { font: 600 12px var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--muted);
+               margin: 0 0 10px; display: flex; align-items: baseline; gap: 10px; }
+  section h2 .aside { margin-left: auto; text-transform: none; letter-spacing: 0; font-weight: 400; }
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+  .panel.scrollx { overflow-x: auto; }
+
+  /* branch health */
+  .branches { width: 100%; border-collapse: collapse; }
+  .branches th { font: 500 11px var(--mono); text-transform: uppercase; letter-spacing: .06em; color: var(--faint);
+                 text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+  .branches td { padding: 9px 14px; border-bottom: 1px solid var(--line); font-size: 13.5px; }
+  .branches tbody tr.brow:nth-last-child(2) td, .branches tbody tr.bdetail:last-child td { border-bottom: 0; }
+  .branches tbody tr.bdetail:last-child td { border-top: 1px solid var(--line); }
+  .branches td.code { font: 600 13px var(--mono); }
+  .branches td.name { color: var(--muted); }
+  tr.brow { cursor: pointer; }
+  tr.brow:hover td { background: var(--paper); }
+  .bbtn { font: inherit; color: inherit; background: none; border: 0; padding: 4px 6px; margin: -4px -6px; cursor: pointer;
+          display: inline-flex; align-items: center; gap: 6px; border-radius: 4px; min-height: 30px; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .bbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .bbtn .chev { font-size: 10px; color: var(--faint); transition: transform .15s; }
+  .bbtn[aria-expanded="true"] .chev { transform: rotate(90deg); }
+  .score { display: grid; grid-template-columns: 28px 1fr; gap: 8px; align-items: center; font: 500 13px var(--mono); min-width: 110px; }
+  .bar { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; }
+  .bar i { display: block; height: 100%; border-radius: 3px; }
+  .red .bar i { background: var(--bad); } .amber .bar i { background: var(--warn); } .green .bar i { background: var(--good); }
+  tr.red td.code { color: var(--bad); }
+  .worst { color: var(--muted); font-size: 12.5px; }
+  .rating { font: 13px var(--mono); white-space: nowrap; }
+  .rating .was { color: var(--faint); }
+  tr.bdetail > td { background: var(--paper); padding: 14px; }
+  .why-h { font: 600 11px var(--mono); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0 0 10px; }
+  .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px 18px; margin: 0; }
+  .facts div { min-width: 0; }
+  .facts dt { font-size: 12px; color: var(--muted); }
+  .facts dd { margin: 0; font: 500 13.5px var(--mono); overflow-wrap: anywhere; }
+  .facts .wide { grid-column: 1 / -1; }
+  .bacts { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 4px; }
+  .bacts li { font-size: 13px; display: flex; gap: 8px; align-items: baseline; }
+  .bacts .status, .bacts .src { flex: none; }
+
+  /* ledger */
+  .totals { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line);
+            border-bottom: 1px solid var(--line); border-radius: var(--radius) var(--radius) 0 0; overflow: hidden; }
+  .totals div { padding: 12px 16px; background: var(--surface); min-width: 0; }
+  .totals b { display: block; font: 500 20px var(--mono); overflow-wrap: anywhere; }
+  .totals span { font-size: 12px; color: var(--muted); }
+  @media (max-width: 560px) { .totals { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .filters { display: flex; gap: 6px; padding: 10px 16px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  .filters button { font: 12px var(--sans); border: 1px solid var(--line); background: transparent; color: var(--muted);
+                    padding: 5px 10px; border-radius: 999px; cursor: pointer; min-height: 30px; }
+  .filters button[aria-pressed="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+  .filters button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .feed { list-style: none; margin: 0; padding: 0; max-height: 720px; overflow: auto; }
+  .act { padding: 14px 16px; border-bottom: 1px solid var(--line); display: grid; gap: 4px; }
+  .act:last-child { border-bottom: 0; }
+  .act.bantay { box-shadow: inset 3px 0 0 var(--src-line); }
+  .act .meta { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; font: 12px var(--mono); color: var(--faint); }
+  .status { font: 600 10.5px var(--mono); letter-spacing: .06em; text-transform: uppercase; padding: 2px 7px; border-radius: 4px; }
+  .s-applied, .s-approved, .s-done { background: var(--ok-soft); color: var(--ok-ink); }
+  .s-pending_approval, .s-requested { background: var(--warn-soft); color: var(--warn-ink); }
+  .s-rejected { background: var(--line); color: var(--muted); }
+  .src { font: 600 10.5px var(--mono); letter-spacing: .04em; padding: 2px 7px; border-radius: 4px; background: var(--src-soft); color: var(--src-ink); }
+  .just { font: 600 10.5px var(--mono); letter-spacing: .04em; padding: 2px 7px; border-radius: 4px; background: var(--ink); color: var(--surface); }
+  .act .what { font-weight: 500; }
+  .act .why { font-size: 13px; color: var(--muted); }
+  .act .ev { font: 12.5px/1.45 var(--mono); color: var(--ink); background: var(--paper); border: 1px solid var(--line);
+             border-radius: 4px; padding: 6px 8px; overflow-wrap: anywhere; }
+  .act .ev::before { content: attr(data-pre) "  "; color: var(--faint); }
+  .meta .php { margin-left: auto; color: var(--ink); }
+  .empty { padding: 36px 16px; color: var(--muted); text-align: center; font-size: 14px; }
+  @keyframes flash { from { background-color: var(--flash); } to { background-color: transparent; } }
+  @media (prefers-reduced-motion: no-preference) { .act.flash { animation: flash 1.5s ease-out 1; } }
+  @media (prefers-reduced-motion: reduce) { .act.marked { outline: 2px solid var(--accent); outline-offset: -2px; } }
+
+  /* how */
+  .how { border-top: 1px solid var(--line); padding: 36px 0 56px; display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
+  .how h3 { font: 600 20px/1.2 var(--serif); margin: 0 0 12px; }
+  .how ol { margin: 0; padding-left: 20px; color: var(--muted); } .how li { margin: 6px 0; }
+  .how li b { color: var(--ink); font-weight: 500; }
+  .policy { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  .policy th, .policy td { text-align: left; padding: 8px 10px 8px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .policy th { font: 500 11px var(--mono); text-transform: uppercase; letter-spacing: .06em; color: var(--faint); }
+  .policy td:first-child { font: 13px var(--mono); }
+  footer { border-top: 1px solid var(--line); padding: 18px 0 28px; font-size: 12.5px; color: var(--faint); }
+
+  @media (max-width: 960px) {
+    .lede, .grid, .how { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+    .branches td.name, .branches th.name { display: none; }
+  }
+  @media (max-width: 560px) {
+    .branches th, .branches td { padding-left: 8px; padding-right: 8px; }
+    .score { min-width: 60px; grid-template-columns: 24px 1fr; }
+    section h2 { flex-wrap: wrap; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .bar i { transition: width .6s cubic-bezier(.2,.7,.2,1); }
+  }
+  @media (prefers-reduced-motion: reduce) { .bbtn .chev { transition: none; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="brand">☤ Suki <span>Autopilot</span></div>
+    <span class="chip" id="mode">loading</span>
+    <div class="asof" id="asof">loading…</div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="lede">
+    <div>
+      <h1>Suki Mart is losing money and customers. Autopilot finds why, fixes it, and shows the evidence.</h1>
+      <p>An operations agent built on Hermes. It diagnoses the struggling branch, moves stock, marks down food before it spoils and cancels duplicate orders. Every action is logged with the numbers behind it, and risky ones wait for a human to approve.</p>
+      <div class="phone">
+        <img src="qr.svg" width="104" height="104" alt="QR code linking to https://suki-autopilot.vercel.app">
+        <div><b>Open on your phone</b><span>suki-autopilot.vercel.app</span></div>
+      </div>
+    </div>
+    <table class="problems" aria-label="Problems found in the data">
+      <tbody id="problems"></tbody>
+    </table>
+  </div>
+
+  <div class="grid">
+    <section aria-labelledby="h-health">
+      <h2 id="h-health">Branch health <span class="aside">0–100 · worst first · tap a branch for why</span></h2>
+      <div class="panel scrollx">
+        <table class="branches">
+          <thead><tr><th>Branch</th><th class="name">Name</th><th>Score</th><th>Rating</th><th>Worst signal</th></tr></thead>
+          <tbody id="branches"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section aria-labelledby="h-ledger">
+      <h2 id="h-ledger">Evidence ledger <span class="aside" id="ledger-note"></span></h2>
+      <div class="panel">
+        <div class="totals" id="totals"></div>
+        <div class="filters" role="group" aria-label="Filter actions" id="filters"></div>
+        <ul class="feed" id="feed"></ul>
+      </div>
+    </section>
+  </div>
+
+  <div class="how">
+    <div>
+      <h3>How it runs</h3>
+      <ol>
+        <li><b>Desktop pane</b> in Hermes: Diagnose, Run Autopilot, Approve / Reject.</li>
+        <li><b>Skill</b> <code>suki-autopilot</code> chains the tools: diagnose → find → act → ledger.</li>
+        <li><b>MCP server</b> <code>suki-autopilot</code>: 10 domain tools on the Suki Mart database. It writes each ledger row before applying the change.</li>
+        <li><b>MCP server</b> <code>bantay</code>: the people and customer fixes (shift cover, ticket escalations, review replies), shown in the feed with a Bantay badge.</li>
+        <li>After each action, the MCP servers mirror the ledger to <b>Neon Postgres</b>. This page reads it through a read-only role and refreshes every 4 seconds.</li>
+      </ol>
+    </div>
+    <div>
+      <h3>Risk policy, enforced in code</h3>
+      <table class="policy">
+        <thead><tr><th>Action</th><th>Applied automatically when</th><th>Otherwise</th></tr></thead>
+        <tbody>
+          <tr><td>transfer_stock</td><td>qty ≤ 100 and donor keeps ≥ 14 days of cover</td><td>waits for approval</td></tr>
+          <tr><td>markdown</td><td>markdown ≤ 30%</td><td>waits for approval</td></tr>
+          <tr><td>cancel_po</td><td>never</td><td>always waits for approval</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<footer><div class="wrap">Built for CAMP / RUN · Hermes Agent hackathon. Suki Mart and all its data are fictional.</div></footer>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const peso = (n) => "₱" + Math.round(n || 0).toLocaleString("en-PH");
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const dash = (v, unit = "") => (v === null || v === undefined || v === "" ? "—" : `${v}${unit}`);
+  const TYPE = { transfer_stock: "Transfer stock", markdown: "Markdown", cancel_po: "Cancel PO" };
+  const STATUS = { applied: "applied", approved: "approved", pending_approval: "pending", rejected: "rejected" };
+  const BANTAY = { shift_cover: "shift cover", escalate_ticket: "ticket escalated", reply_to_review: "review reply", stock_transfer: "stock transfer" };
+  const JUST = { approved: "Just approved", rejected: "Just rejected", applied: "Just applied", done: "Just done" };
+  const STALE_S = 300, LABEL_MS = 10000;
+  let data = null, filter = "all", lastSig = "", skew = 0;
+  let prev = null, prevLive = null;      // key -> status at the previous poll (null until the first load)
+  const marks = new Map();               // key -> { label, until, flashed }
+  const seen = new Map();                // key -> first time seen this session (new cards go on top)
+  const open = new Set();                // expanded branch codes
+  const nowMs = () => Date.now() + skew; // server clock (from the Date header), so a wrong laptop clock can't fake "stale"
+
+  const ago = (iso) => {
+    const s = Math.max(0, Math.round((nowMs() - new Date(iso).getTime()) / 1000));
+    return s < 60 ? `${s}s ago` : s < 3600 ? `${Math.round(s / 60)}m ago` : `${Math.round(s / 3600)}h ago`;
+  };
+
+  function header() {
+    if (!data) return;
+    const m = $("mode");
+    if (data.live && data.synced_at) {
+      const s = Math.max(0, Math.floor((nowMs() - new Date(data.synced_at).getTime()) / 1000));
+      if (s > STALE_S) {
+        const min = Math.floor(s / 60);
+        m.dataset.state = "stale";
+        m.textContent = `Last sync ${min < 120 ? `${min} min` : `${Math.floor(min / 60)} h`} ago — data may be out of date`;
+      } else {
+        m.dataset.state = "live";
+        m.textContent = `● Live · synced ${s < 60 ? `${s} s` : `${Math.floor(s / 60)} min`} ago`;
+      }
+    } else {
+      m.dataset.state = "snapshot";
+      m.textContent = data.live ? "● live from Neon" : "snapshot";
+    }
+    $("asof").textContent = `data as of ${String(data.as_of).slice(0, 16)}`;
+  }
+
+  // ---- feed items: Autopilot actions + Bantay people/customer fixes, one list
+  const items = (d) => [
+    ...d.actions.map((a) => ({ key: `a:${a.id}`, kind: "a", id: a.id, status: a.status, created: a.created_at || "", a })),
+    ...(d.bantay || []).map((b) => ({ key: `b:${b.id}`, kind: "b", id: b.id, status: b.status, created: b.created_at || "", b })),
+  ];
+  const order = (x, y) => (y.created > x.created) - (y.created < x.created)
+    || (seen.get(y.key) || 0) - (seen.get(x.key) || 0)
+    || (x.kind === y.kind ? y.id - x.id : x.kind === "b" ? -1 : 1);
+
+  function card(it) {
+    const mk = marks.get(it.key), live = mk && mk.until > Date.now();
+    const cls = ["act", it.kind === "b" ? "bantay" : "", live ? "marked" : "", live && !mk.flashed ? "flash" : ""].filter(Boolean).join(" ");
+    if (live) mk.flashed = true;
+    const just = live ? `<span class="just">${esc(mk.label)}</span>` : "";
+    if (it.kind === "b") {
+      const b = it.b;
+      return `<li class="${cls}" data-key="${it.key}">
+        <div class="meta"><span class="src">Bantay · ${esc(BANTAY[b.type] || String(b.type || "").replace(/_/g, " "))}</span>
+          <span class="status s-${esc(b.status)}">${esc(b.status)}</span>${just}
+          <span>B#${b.id}${b.branch ? ` · ${esc(b.branch)}` : ""} · people &amp; customers</span></div>
+        <div class="what">${esc(b.summary)}</div>
+        ${b.evidence ? `<div class="ev" data-pre="${b.type === "reply_to_review" ? "reply" : "based on"}">${esc(b.evidence)}</div>` : ""}
+      </li>`;
+    }
+    const a = it.a;
+    return `<li class="${cls}" data-key="${it.key}">
+      <div class="meta"><span class="status s-${esc(a.status)}">${esc(STATUS[a.status] || a.status)}</span>${just}
+        <span>#${a.id} · ${esc(TYPE[a.type] || a.type)} · conf ${Number(a.confidence).toFixed(2)}</span>
+        <span class="php">${peso(a.php)}</span></div>
+      <div class="what">${esc(a.summary)}</div>
+      <div class="ev" data-pre="based on">${esc(a.evidence)}</div>
+      ${a.reasoning ? `<div class="why">${esc(a.reasoning)}</div>` : ""}
+    </li>`;
+  }
+
+  function drawFeed() {
+    const rows = items(data).filter((it) => filter === "all" || (filter === "bantay" ? it.kind === "b" : it.kind === "a" && it.status === filter)).sort(order);
+    $("feed").innerHTML = rows.length ? rows.map(card).join("")
+      : `<li class="empty">No actions yet. Press Run Autopilot in Hermes Desktop; actions appear here within seconds.</li>`;
+    [...$("filters").children].forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.f === filter)));
+  }
+
+  // ---- branch drill-down ("why it's struggling")
+  const branchActions = (b) => {
+    const ids = b.detail && Array.isArray(b.detail.action_ids) ? new Set(b.detail.action_ids) : null;
+    const re = new RegExp(`\\b${String(b.branch).replace(/[^A-Z0-9]/gi, "")}\\b`);
+    const auto = data.actions.filter((a) => (ids ? ids.has(a.id) : re.test(`${a.summary} ${a.evidence}`)));
+    const people = (data.bantay || []).filter((x) => x.branch === b.branch);
+    return [
+      ...people.map((x) => `<li><span class="src">Bantay · ${esc(BANTAY[x.type] || x.type)}</span><span>B#${x.id} ${esc(x.summary)}</span></li>`),
+      ...auto.map((a) => `<li><span class="status s-${esc(a.status)}">${esc(STATUS[a.status] || a.status)}</span><span>#${a.id} ${esc(a.summary)}</span></li>`),
+    ];
+  };
+
+  function detailHtml(b) {
+    const d = b.detail || {};
+    const before = b.rating_before, recent = b.rating_recent;
+    const rating = before == null && recent == null ? "—" : `${dash(before)} → ${dash(recent)}★`;
+    const topics = Array.isArray(d.top_negative_topics) && d.top_negative_topics.length
+      ? d.top_negative_topics.map((t) => `${t.topic} (${t.negative_reviews})`).join(", ") : "—";
+    const acts = branchActions(b), more = acts.length > 8 ? `<li><span>+${acts.length - 8} more in the feed</span></li>` : "";
+    return `<p class="why-h">Why ${esc(b.branch)} scores ${dash(b.health_score)}/100</p>
+      <dl class="facts">
+        <div><dt>Rating, before → last 35 days</dt><dd>${esc(rating)}</dd></div>
+        <div><dt>Missed shifts (30 d)</dt><dd>${esc(dash(b.missed_shift_pct_30d, "%"))}</dd></div>
+        <div><dt>Late deliveries (30 d)</dt><dd>${esc(dash(b.late_delivery_pct_30d, "%"))}</dd></div>
+        <div><dt>Unanswered tickets</dt><dd>${esc(dash(b.unanswered_tickets))}</dd></div>
+        <div><dt>Worst metric</dt><dd>${esc(b.worst_metric || (b.health_score != null ? "healthy" : "—"))}</dd></div>
+        <div><dt>Lapsed regulars</dt><dd>${esc(dash(d.lapsed_regulars))}</dd></div>
+        <div class="wide"><dt>Top negative review topics (1–2★, 35 d)</dt><dd>${esc(topics)}</dd></div>
+        <div class="wide"><dt>Fixes for this branch in the feed</dt><dd>${acts.length ? `<ul class="bacts">${acts.slice(0, 8).join("")}${more}</ul>` : "—"}</dd></div>
+      </dl>`;
+  }
+
+  function drawBranches() {
+    const f = document.activeElement && document.activeElement.classList.contains("bbtn") ? document.activeElement.dataset.code : null;
+    $("branches").innerHTML = data.branches.map((b) => {
+      const code = esc(b.branch), isOpen = open.has(b.branch), id = `bd-${code}`;
+      return `
+      <tr class="${esc(b.status)} brow" data-code="${code}">
+        <td class="code"><button type="button" class="bbtn" data-code="${code}" aria-expanded="${isOpen}" aria-controls="${id}">${code}<span class="chev" aria-hidden="true">▶</span><span class="sr"> details</span></button></td>
+        <td class="name">${esc(String(b.name).replace("Suki Mart ", ""))}</td>
+        <td><div class="score"><span>${b.health_score}</span><div class="bar"><i style="width:${Math.max(3, b.health_score)}%"></i></div></div></td>
+        <td class="rating">${b.rating_recent ?? "–"}<span class="was"> / ${b.rating_before ?? "–"}</span></td>
+        <td class="worst">${esc(b.worst_metric || "healthy")}</td>
+      </tr>
+      <tr class="bdetail" id="${id}"${isOpen ? "" : " hidden"}><td colspan="5">${isOpen ? detailHtml(b) : ""}</td></tr>`;
+    }).join("");
+    if (f) { const el = $("branches").querySelector(`.bbtn[data-code="${CSS.escape(f)}"]`); if (el) el.focus({ preventScroll: true }); }
+  }
+
+  $("branches").addEventListener("click", (e) => {
+    const tr = e.target.closest("tr.brow");
+    if (!tr || (e.target.closest("a"))) return;
+    const code = tr.dataset.code, btn = tr.querySelector(".bbtn"), det = $(`bd-${code}`);
+    const b = data.branches.find((x) => String(x.branch) === code);
+    if (!b || !det) return;
+    const willOpen = !open.has(code);
+    willOpen ? open.add(code) : open.delete(code);
+    btn.setAttribute("aria-expanded", String(willOpen));
+    det.hidden = !willOpen;
+    det.firstElementChild.innerHTML = willOpen ? detailHtml(b) : "";
+    if (e.target !== btn && !btn.contains(e.target)) btn.focus({ preventScroll: true });
+  });
+
+  function render() {
+    const d = data, p = d.problems;
+    header();
+    $("problems").innerHTML = [
+      [`Kapitolyo rating, last 35 days (health ${p.kpt.score}/100)`, `${p.kpt.rating_before} → ${p.kpt.rating_recent}★`],
+      ["Products out of stock while another branch has 60+ days of cover", `${p.stock.products} · ${p.stock.pairs} pairs`],
+      ["Perishables expiring within 2 days, at cost", peso(p.expiring.php)],
+      ["Duplicate open purchase orders still open", `${p.duplicates.count} · ${peso(p.duplicates.php)}`],
+    ].map(([k, v]) => `<tr><td>${esc(k)}</td><td class="n">${esc(v)}</td></tr>`).join("");
+
+    drawBranches();
+
+    const t = d.totals;
+    const phpPending = t.php_pending ?? d.actions.filter((a) => a.status === "pending_approval").reduce((s, a) => s + (a.php || 0), 0);
+    $("totals").innerHTML = `
+      <div><b>${t.applied}</b><span>applied or approved</span></div>
+      <div><b>${t.pending}</b><span>waiting for approval</span></div>
+      <div><b>${peso(t.php_protected)}</b><span>₱ protected (applied + approved)</span></div>
+      <div><b>${peso(phpPending)}</b><span>₱ waiting for approval</span></div>`;
+    const nb = (d.bantay || []).length;
+    $("ledger-note").textContent = d.actions.length || nb
+      ? `${d.actions.length} actions${nb ? ` · ${nb} Bantay fixes` : ""} · newest first` : "";
+
+    const counts = d.actions.reduce((m, a) => (m[a.status] = (m[a.status] || 0) + 1, m), {});
+    if (filter === "bantay" ? !nb : filter !== "all" && !counts[filter]) filter = "all";
+    const opts = [["all", "All", d.actions.length + nb], ...Object.keys(STATUS).filter((k) => counts[k]).map((k) => [k, STATUS[k], counts[k]])];
+    if (nb) opts.push(["bantay", "Bantay · people & customers", nb]);
+    $("filters").innerHTML = opts.map(([k, label, n]) => `<button type="button" data-f="${k}">${esc(label)} · ${n}</button>`).join("");
+    drawFeed();
+  }
+
+  $("filters").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) { filter = b.dataset.f; drawFeed(); } });
+
+  // Compare with the previous poll: changed status -> "Just approved" etc., new card -> "New". Never on the first load.
+  function diff(d) {
+    const cur = new Map(items(d).map((it) => [it.key, it.status]));
+    const t = Date.now();
+    if (prev && prevLive === !!d.live) {
+      for (const [k, s] of cur) {
+        if (!prev.has(k)) marks.set(k, { label: "New", until: t + LABEL_MS, flashed: false });
+        else if (prev.get(k) !== s) marks.set(k, { label: JUST[s] || "Updated", until: t + LABEL_MS, flashed: false });
+      }
+    }
+    for (const k of cur.keys()) if (!seen.has(k)) seen.set(k, prev && prevLive === !!d.live ? t : 0);
+    prev = cur; prevLive = !!d.live;
+  }
+
+  async function load() {
+    let d = null;
+    try {
+      const r = await fetch("/api/snapshot", { cache: "no-store" });
+      if (r.ok) {
+        d = await r.json();
+        const sd = Date.parse(r.headers.get("date") || "");
+        if (!Number.isNaN(sd)) { const off = sd - Date.now(); skew = Math.abs(off) > 2000 ? off : 0; }  // Date header is whole seconds
+      }
+    } catch {}
+    if (!d && data && data.live) { header(); return; }   // keep the last live data; the badge shows its age
+    if (!d) { try { const r = await fetch("snapshot.json", { cache: "no-store" }); if (r.ok) d = { ...(await r.json()), live: false }; } catch {} }
+    if (!d) { if (!data) $("asof").textContent = "data unavailable"; return; }
+    d.actions = d.actions || []; d.bantay = d.bantay || []; d.branches = d.branches || [];
+    diff(d);
+    const { synced_at, ...rest } = d;
+    const sig = JSON.stringify(rest);
+    data = d;
+    if (sig !== lastSig) { lastSig = sig; render(); } else header();
+  }
+
+  // Every second: refresh the sync badge and drop expired "Just …" labels, without refetching.
+  setInterval(() => {
+    header();
+    const t = Date.now();
+    for (const [k, m] of marks) {
+      if (m.until > t) continue;
+      marks.delete(k);
+      const el = $("feed").querySelector(`[data-key="${k}"]`);
+      if (el) { el.classList.remove("marked", "flash"); el.querySelector(".just")?.remove(); }
+    }
+  }, 1000);
+
+  load();
+  setInterval(() => { if (!document.hidden) load(); }, 4000);
+})();
+</script>
+</body>
+</html>

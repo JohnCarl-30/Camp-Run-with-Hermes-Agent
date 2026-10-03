@@ -1,0 +1,9 @@
+{
+  "name": "suki-autopilot",
+  "label": "Suki Autopilot",
+  "description": "Read-only backend for the Suki Autopilot desktop pane: branch health and the evidence ledger.",
+  "icon": "Activity",
+  "version": "1.0.0",
+  "tab": { "hidden": true },
+  "api": "plugin_api.py"
+}

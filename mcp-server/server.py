@@ -1,6 +1,6 @@
 # /// script
 # requires-python = ">=3.10"
-# dependencies = ["mcp>=1.2,<2"]  # pinned: v1 API (FastMCP) — what most docs & AI assistants use
+# dependencies = ["mcp>=1.2,<2", "psycopg[binary]>=3.1"]  # pinned: v1 API (FastMCP); psycopg = public-site mirror
 # ///
 """
 BANTAY — Suki Mart's branch watchdog (Layer 1: the hands).
@@ -17,6 +17,8 @@ Test:             hermes mcp test bantay
 """
 import os
 import sqlite3
+import sys
+import threading
 from typing import Any
 
 from mcp.server.fastmcp import FastMCP
@@ -85,7 +87,47 @@ def log_action(action_type: str, branch_code: str | None, target: str, summary: 
         "VALUES (?,?,?,?,?,?,?)",
         (now(), action_type, branch_code, target, summary, evidence, status),
     )
-    return query("SELECT max(id) AS id FROM bantay_actions")[0]["id"]
+    aid = query("SELECT max(id) AS id FROM bantay_actions")[0]["id"]
+    mirror_public()
+    return aid
+
+
+# ------------------------------------------------- public website mirror (Neon)
+# After each Bantay action, refresh the Neon mirror that https://suki-autopilot.vercel.app
+# reads, so the action shows up in the site's feed within seconds. It reuses Suki
+# Autopilot's snapshot() + neon_sync (one source of truth for the mirror); that module is
+# imported lazily and only its functions are called (its FastMCP server is never run).
+# Runs on one background worker that coalesces bursts; any failure is swallowed, so the
+# mirror can never break or slow down a Bantay action.
+_mirror_wake = threading.Event()
+_mirror_start = threading.Lock()
+_mirror_thread: threading.Thread | None = None
+
+
+def _mirror_worker() -> None:
+    while True:
+        _mirror_wake.wait()
+        _mirror_wake.clear()
+        try:
+            here = os.path.dirname(os.path.abspath(__file__))
+            if here not in sys.path:
+                sys.path.insert(0, here)
+            import suki_autopilot  # noqa: PLC0415  (lazy on purpose)
+            suki_autopilot.sync_public()
+        except Exception:
+            pass
+
+
+def mirror_public() -> None:
+    global _mirror_thread
+    try:
+        with _mirror_start:
+            if _mirror_thread is None or not _mirror_thread.is_alive():
+                _mirror_thread = threading.Thread(target=_mirror_worker, name="neon-mirror", daemon=True)
+                _mirror_thread.start()
+        _mirror_wake.set()
+    except Exception:
+        pass
 
 
 # ------------------------------------------------------------- signal helpers
